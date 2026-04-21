@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(mv temp-project/* .)",
+      "Bash(mv temp-project/.gitignore .)",
+      "Bash(rm -rf temp-project)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(mkdir -p \"C:/Users/jaini/IntellijIdea/Patel_Platic/eyewears/server/src/config\")",
+      "Bash(mkdir -p \"C:/Users/jaini/IntellijIdea/Patel_Platic/eyewears/server/src/controllers\")",
+      "Bash(mkdir -p \"C:/Users/jaini/IntellijIdea/Patel_Platic/eyewears/server/src/models\")",
+      "Bash(mkdir -p \"C:/Users/jaini/IntellijIdea/Patel_Platic/eyewears/server/src/routes\")",
+      "Bash(mkdir -p \"C:/Users/jaini/IntellijIdea/Patel_Platic/eyewears/server/src/middleware\")",
+      "Bash(python -m venv venv)",
+      "Bash(.\\\\venv\\\\Scripts\\\\activate.ps1)",
+      "Bash(pip install:*)",
+      "Bash(python -m pip install -r requirements.txt)",
+      "Bash(python -m pip install --upgrade pip)",
+      "Bash(npm init *)"
+    ]
+  }
+}
