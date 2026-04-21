@@ -1,10 +1,14 @@
 import React, { useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+import { curtainTransition } from '../../gsap/pageTransitions'
 import { useGSAP } from '../../hooks/useGSAP'
 import gsap from 'gsap'
 
 export function CategoryGrid({ categories = [] }) {
   const containerRef = useRef(null)
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
 
   const fallbackCategories = [
     { name: 'Men', image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=500', colSpan: 'col-span-1', rowSpan: 'row-span-2' },
@@ -17,6 +21,8 @@ export function CategoryGrid({ categories = [] }) {
     ? categories.map((category, idx) => ({
         name: category.name,
         slug: category.slug,
+        icon: category.icon || '👓',
+        description: category.description,
         image: idx % 2
           ? 'https://images.unsplash.com/photo-1577803645773-f96470509666?q=80&w=500'
           : 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=500',
@@ -51,6 +57,15 @@ export function CategoryGrid({ categories = [] }) {
     }
   }
 
+  const handleCategoryClick = (e, cat) => {
+    e.preventDefault()
+    if (!isAuthenticated) {
+      curtainTransition(navigate, '/auth')
+    } else {
+      curtainTransition(navigate, `/shop?category=${cat.slug || cat.name.toLowerCase()}`)
+    }
+  }
+
   return (
     <section ref={containerRef} className="category-grid bg-white px-6 py-24">
       <div className="container-main mx-auto">
@@ -61,9 +76,10 @@ export function CategoryGrid({ categories = [] }) {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 auto-rows-[240px]">
           {displayCategories.map((cat, idx) => (
-            <Link
+            <a
               key={idx}
-              to={`/shop?category=${cat.slug || cat.name.toLowerCase()}`}
+              href="#"
+              onClick={(e) => handleCategoryClick(e, cat)}
               className={`category-card group relative block overflow-hidden rounded-2xl bg-section-alt ${cat.colSpan} ${cat.rowSpan}`}
               onMouseEnter={(e) => handleCardHover(e, true)}
               onMouseLeave={(e) => handleCardHover(e, false)}
@@ -78,11 +94,16 @@ export function CategoryGrid({ categories = [] }) {
               
               <div className="absolute bottom-6 left-6 flex items-center gap-3">
                 <span className="cat-icon flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg shadow-sm">
-                  👓
+                  {cat.icon || '👓'}
                 </span>
-                <span className="text-xl font-bold text-white">{cat.name}</span>
+                <div>
+                  <span className="block text-xl font-bold text-white">{cat.name}</span>
+                  {cat.description && (
+                    <span className="block text-sm text-white/80">{cat.description}</span>
+                  )}
+                </div>
               </div>
-            </Link>
+            </a>
           ))}
         </div>
       </div>

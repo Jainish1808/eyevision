@@ -189,3 +189,102 @@ async def get_related_products(product_id: str, limit: int = 8, db: Database = D
         .limit(limit)
     )
     return [_product_to_response(p) for p in related]
+
+
+@router.get("/{product_id}/combos")
+async def get_product_combos(product_id: str, limit: int = 4, db: Database = Depends(get_db)):
+    """Get combo suggestions for a product (e.g., frame + lens, glasses + case)."""
+    product = db.products.find_one({"id": product_id})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    category_slug = product.get("category_id", "")
+    combos = []
+
+    # Logic: If it's a frame/specs, suggest lenses and cases
+    if category_slug in ["normal-specs", "sunglasses", "number-glasses"]:
+        # Find lenses
+        lenses = list(
+            db.products.find({"is_active": True, "category_id": "lenses"})
+            .sort("rating", DESCENDING)
+            .limit(2)
+        )
+        # Find cases
+        cases = list(
+            db.products.find({"is_active": True, "category_id": "cases"})
+            .sort("rating", DESCENDING)
+            .limit(2)
+        )
+        combos.extend(lenses + cases)
+
+    # If it's a lens, suggest frames
+    elif category_slug == "lenses":
+        frames = list(
+            db.products.find(
+                {
+                    "is_active": True,
+                    "category_id": {"$in": ["normal-specs", "sunglasses", "number-glasses"]},
+                }
+            )
+            .sort("rating", DESCENDING)
+            .limit(limit)
+        )
+        combos.extend(frames)
+
+    # If it's a case, suggest frames
+    elif category_slug == "cases":
+        frames = list(
+            db.products.find(
+                {
+                    "is_active": True,
+                    "category_id": {"$in": ["normal-specs", "sunglasses"]},
+                }
+            )
+            .sort("rating", DESCENDING)
+            .limit(limit)
+        )
+        combos.extend(frames)
+
+    return {
+        "product": _product_to_response(product),
+        "combos": [_product_to_response(c) for c in combos[:limit]],
+        "total_discount": 15,  # Example: 15% discount on combo
+    }
+
+
+@router.get("/{product_id}/suggestions")
+async def get_product_suggestions(product_id: str, limit: int = 6, db: Database = Depends(get_db)):
+    """Get individual product suggestions based on current product."""
+    product = db.products.find_one({"id": product_id})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    # Get products from same category and brand
+    same_brand = list(
+        db.products.find(
+            {
+                "is_active": True,
+                "id": {"$ne": product_id},
+                "brand": product.get("brand"),
+            }
+        )
+        .sort("rating", DESCENDING)
+        .limit(limit // 2)
+    )
+
+    # Get products from same category but different brand
+    same_category = list(
+        db.products.find(
+            {
+                "is_active": True,
+                "id": {"$ne": product_id},
+                "category_id": product.get("category_id"),
+                "brand": {"$ne": product.get("brand")},
+            }
+        )
+        .sort("rating", DESCENDING)
+        .limit(limit // 2)
+    )
+
+    suggestions = same_brand + same_category
+    return [_product_to_response(s) for s in suggestions[:limit]]

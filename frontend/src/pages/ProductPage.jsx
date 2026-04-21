@@ -17,6 +17,8 @@ export function ProductPage() {
   const navigate = useNavigate()
   const [product, setProduct] = React.useState(null)
   const [related, setRelated] = React.useState([])
+  const [combos, setCombos] = React.useState([])
+  const [suggestions, setSuggestions] = React.useState([])
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState('')
   const [isAdding, setIsAdding] = React.useState(false)
@@ -53,13 +55,17 @@ export function ProductPage() {
       setIsLoading(true)
       setError('')
       try {
-        const [productRes, relatedRes] = await Promise.all([
+        const [productRes, relatedRes, combosRes, suggestionsRes] = await Promise.all([
           productAPI.getById(id),
-          productAPI.getRelated(id, 6)
+          productAPI.getRelated(id, 6),
+          productAPI.getCombos(id, 4),
+          productAPI.getSuggestions(id, 6)
         ])
 
         setProduct(productRes.data)
         setRelated(relatedRes.data || [])
+        setCombos(combosRes.data?.combos || [])
+        setSuggestions(suggestionsRes.data || [])
       } catch (err) {
         setError(err?.response?.data?.detail || 'Unable to load product details.')
       } finally {
@@ -118,7 +124,12 @@ export function ProductPage() {
         )}
       </main>
 
-      <ComboSuggestions products={related} onAddSuggestion={handleAddToCart} />
+      <ComboSuggestions 
+        combos={combos} 
+        suggestions={suggestions}
+        related={related}
+        onAddSuggestion={handleAddToCart} 
+      />
     </div>
   )
 }

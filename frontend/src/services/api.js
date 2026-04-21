@@ -39,6 +39,8 @@ export const productAPI = {
   getTrending: (limit = 8) => apiClient.get('/products/trending', { params: { limit } }),
   getNewArrivals: (limit = 8) => apiClient.get('/products/new-arrivals', { params: { limit } }),
   getRelated: (id, limit = 8) => apiClient.get(`/products/${id}/related`, { params: { limit } }),
+  getCombos: (id, limit = 4) => apiClient.get(`/products/${id}/combos`, { params: { limit } }),
+  getSuggestions: (id, limit = 6) => apiClient.get(`/products/${id}/suggestions`, { params: { limit } }),
   search: (query) => apiClient.get('/products/search', { params: { q: query } }),
   getCategories: () => apiClient.get('/products/categories'),
 }

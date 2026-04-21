@@ -8,6 +8,8 @@ import OTPInput from '../components/auth/OTPInput'
 import GoogleAuthButton from '../components/auth/GoogleAuthButton'
 import { useGSAP } from '../hooks/useGSAP'
 import { curtainTransition } from '../gsap/pageTransitions'
+import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import { authAPI } from '../services/api'
 
 const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_]{2,29}$/
@@ -47,6 +49,8 @@ export function AuthPage() {
   })
 
   const navigate = useNavigate()
+  const { login, register, verifyMFA } = useAuth()
+  const toast = useToast()
 
   useGSAP(() => {
     const tl = gsap.timeline()
@@ -72,18 +76,16 @@ export function AuthPage() {
   }, [otpCooldown])
 
   const finishAuth = (data) => {
-    localStorage.setItem('auth_token', data.token)
-    localStorage.setItem('refresh_token', data.refreshToken)
-    localStorage.setItem('auth_user', JSON.stringify(data.user))
-
     confetti({
       particleCount: 120,
       spread: 78,
       origin: { y: 0.62 }
     })
 
+    toast.success('Welcome! Redirecting...')
+
     window.setTimeout(() => {
-      curtainTransition(navigate, '/home')
+      curtainTransition(navigate, '/')
     }, 260)
   }
 
@@ -142,14 +144,17 @@ export function AuthPage() {
     setIsLoading(true)
 
     try {
-      const payload = {
-        email: loginForm.email.trim().toLowerCase(),
-        password: loginForm.password
+      const result = await login(loginForm.email.trim().toLowerCase(), loginForm.password)
+      
+      if (result.mfaRequired) {
+        setAuthMode('mfa')
+        toast.info('MFA verification required')
+      } else {
+        finishAuth(result)
       }
-      const { data } = await authAPI.login(payload.email, payload.password)
-      finishAuth(data)
     } catch (err) {
       setFormError(err?.response?.data?.detail || 'Unable to login. Please try again.')
+      toast.error('Login failed')
     } finally {
       setIsLoading(false)
     }
@@ -174,10 +179,12 @@ export function AuthPage() {
         password: registerForm.password,
         confirm_password: registerForm.confirm_password
       }
-      const { data } = await authAPI.register(payload)
-      finishAuth(data)
+      await register(payload)
+      toast.success('Account created successfully!')
+      finishAuth({})
     } catch (err) {
       setFormError(err?.response?.data?.detail || 'Unable to create account. Please try again.')
+      toast.error('Registration failed')
     } finally {
       setIsLoading(false)
     }

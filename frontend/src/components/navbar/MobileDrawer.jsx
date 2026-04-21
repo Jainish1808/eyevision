@@ -1,12 +1,19 @@
 import React, { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { X, ChevronRight } from 'lucide-react'
+import { X, ChevronRight, User, Package, Heart, Settings, LogOut } from 'lucide-react'
 import gsap from 'gsap'
 
-export function MobileDrawer({ isOpen, onClose, links, categories = [], isLoggedIn = false }) {
+export function MobileDrawer({ isOpen, onClose, links, categories = [], isLoggedIn = false, onLogout }) {
   const drawerRef = useRef(null)
   const overlayRef = useRef(null)
   const linksRef = useRef([])
+
+  const userMenuItems = [
+    { label: 'My Profile', icon: User, path: '/profile' },
+    { label: 'My Orders', icon: Package, path: '/orders' },
+    { label: 'Wishlist', icon: Heart, path: '/wishlist' },
+    { label: 'Settings', icon: Settings, path: '/settings' },
+  ]
 
   useEffect(() => {
     if (isOpen) {
@@ -36,6 +43,13 @@ export function MobileDrawer({ isOpen, onClose, links, categories = [], isLogged
       document.body.style.overflow = ''
     }
   }, [isOpen])
+
+  const handleLogoutClick = () => {
+    onClose()
+    if (onLogout) {
+      onLogout()
+    }
+  }
 
   return (
     <>
@@ -96,16 +110,39 @@ export function MobileDrawer({ isOpen, onClose, links, categories = [], isLogged
             </div>
           )}
 
-          <div ref={(el) => (linksRef.current[links.length + categories.length + 2] = el)} className="mt-4 border-t border-border-default pt-6">
-            {isLoggedIn ? (
-              <Link
-                to="/home"
-                onClick={onClose}
-                className="flex w-full items-center justify-center rounded-lg border border-border-strong bg-white py-3 px-4 text-btn text-text-primary"
-              >
-                Go to Home
-              </Link>
-            ) : (
+          {isLoggedIn && (
+            <div className="mt-3 border-t border-border-default pt-5">
+              <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-[0.14em] text-text-muted">
+                My Account
+              </p>
+              <div className="flex flex-col gap-1">
+                {userMenuItems.map((item, idx) => (
+                  <Link
+                    key={item.label}
+                    to={item.path}
+                    onClick={onClose}
+                    ref={(el) => (linksRef.current[links.length + categories.length + idx + 3] = el)}
+                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-text-primary transition-colors hover:bg-section-alt"
+                  >
+                    <item.icon size={18} />
+                    {item.label}
+                  </Link>
+                ))}
+                
+                <button
+                  onClick={handleLogoutClick}
+                  ref={(el) => (linksRef.current[links.length + categories.length + userMenuItems.length + 3] = el)}
+                  className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-red-600 transition-colors hover:bg-red-50"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div ref={(el) => (linksRef.current[links.length + categories.length + userMenuItems.length + 4] = el)} className="mt-4 border-t border-border-default pt-6">
+            {!isLoggedIn && (
               <Link
                 to="/auth"
                 onClick={onClose}

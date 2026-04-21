@@ -1,5 +1,11 @@
 import React, { useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { AuthProvider } from './context/AuthContext'
+import { ToastProvider } from './context/ToastContext'
+import { AlertProvider } from './context/AlertContext'
+import { ProtectedRoute, GuestRoute } from './components/auth/ProtectedRoute'
+import { useIdleTimeout } from './hooks/useIdleTimeout'
 import { Loader } from './components/ui/Loader'
 import { Cursor } from './components/cursor/Cursor'
 import { Footer } from './components/sections/Footer'
@@ -8,13 +14,16 @@ import cursorSystem from './gsap/cursorSystem'
 // Pages
 import LandingPage from './pages/LandingPage'
 import AuthPage from './pages/AuthPage'
-import HomePage from './pages/HomePage'
 import ShopPage from './pages/ShopPage'
 import ProductPage from './pages/ProductPage'
 import CartPage from './pages/CartPage'
+import { NotFoundPage, UnauthorizedPage, ForbiddenPage } from './pages/ErrorPages'
 
-export function App() {
+const AppContent = () => {
   const location = useLocation()
+  
+  // Initialize idle timeout
+  useIdleTimeout()
 
   // Initialize cursor system on mount
   useEffect(() => {
@@ -33,23 +42,61 @@ export function App() {
       <div className="page-curtain" />
       <Loader />
       
-      {/* ScrollSmoother Wrapper */}
       <div id="smooth-wrapper">
         <div id="smooth-content">
           <Routes location={location} key={location.pathname}>
+            {/* Main landing/home page - shows different content based on auth */}
             <Route path="/" element={<LandingPage />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/shop" element={<ShopPage />} />
-            <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/cart" element={<CartPage />} />
+            
+            {/* Guest-only routes (redirect if authenticated) */}
+            <Route path="/auth" element={
+              <GuestRoute>
+                <AuthPage />
+              </GuestRoute>
+            } />
+            
+            {/* Protected routes (require authentication) */}
+            <Route path="/shop" element={
+              <ProtectedRoute>
+                <ShopPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/product/:id" element={
+              <ProtectedRoute>
+                <ProductPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/cart" element={
+              <ProtectedRoute>
+                <CartPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Error pages */}
+            <Route path="/401" element={<UnauthorizedPage />} />
+            <Route path="/403" element={<ForbiddenPage />} />
+            <Route path="/404" element={<NotFoundPage />} />
+            
+            {/* Redirect old /home to / */}
+            <Route path="/home" element={<Navigate to="/" replace />} />
+            
+            {/* Catch-all 404 */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
           
-          {/* Global Footer (not on Auth page) */}
-          {location.pathname !== '/auth' && <Footer />}
+          {/* Global Footer (not on Auth or error pages) */}
+          {!location.pathname.match(/\/(auth|401|403|404)/) && <Footer />}
         </div>
       </div>
     </>
+  )
+}
+
+export function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   )
 }
 

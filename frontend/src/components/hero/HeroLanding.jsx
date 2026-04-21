@@ -165,6 +165,15 @@ export function HeroLanding() {
     curtainTransition(navigate, '/auth')
   }
 
+  const handleBrowseClick = (e) => {
+    e.preventDefault()
+    // Scroll to categories section
+    const nextSection = document.querySelector('.home-categories')
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
     <section ref={containerRef} className="relative flex min-h-[100dvh] items-center overflow-hidden bg-page-bg pt-16">
       <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-[1] opacity-70" />
@@ -201,13 +210,13 @@ export function HeroLanding() {
             >
               Start Shopping <ArrowRight size={18} />
             </a>
-            <Link
-              to="/shop"
+            <button
+              onClick={handleBrowseClick}
               data-cursor="link"
               className="rounded-lg border-2 border-accent-primary bg-transparent px-8 py-4 text-btn text-text-primary transition-colors hover:bg-accent-primary hover:text-white"
             >
               Browse Collection
-            </Link>
+            </button>
           </div>
 
           <div className="hero-trust mt-12 flex items-center gap-8 border-t border-border-default pt-8">

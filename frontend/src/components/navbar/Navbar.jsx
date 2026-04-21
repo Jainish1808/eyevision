@@ -1,8 +1,10 @@
 import React, { useRef } from 'react'
-import { Link } from 'react-router-dom'
-import { ChevronDown, Menu, Search, ShoppingBag } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ChevronDown, Menu, Search, ShoppingBag, User, LogOut, Package, Heart, Settings } from 'lucide-react'
 import { useGSAP } from '../../hooks/useGSAP'
 import { navbarScrollTrigger } from '../../gsap/scrollAnimations'
+import { useAuth } from '../../context/AuthContext'
+import { useToast } from '../../context/ToastContext'
 import MobileDrawer from './MobileDrawer'
 import gsap from 'gsap'
 
@@ -10,37 +12,10 @@ export function Navbar({ isTransparent = false }) {
   const navRef = useRef(null)
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
   const [isCategoryOpen, setIsCategoryOpen] = React.useState(false)
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false)
-  const [userName, setUserName] = React.useState('Account')
-
-  React.useEffect(() => {
-    const syncAuth = () => {
-      const token = localStorage.getItem('auth_token')
-      const userRaw = localStorage.getItem('auth_user')
-
-      setIsLoggedIn(Boolean(token))
-      if (!userRaw) {
-        setUserName('Account')
-        return
-      }
-
-      try {
-        const parsed = JSON.parse(userRaw)
-        setUserName(parsed?.username || parsed?.name || 'Account')
-      } catch {
-        setUserName('Account')
-      }
-    }
-
-    syncAuth()
-    window.addEventListener('storage', syncAuth)
-    window.addEventListener('focus', syncAuth)
-
-    return () => {
-      window.removeEventListener('storage', syncAuth)
-      window.removeEventListener('focus', syncAuth)
-    }
-  }, [])
+  const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
+  const { isAuthenticated, user, logout } = useAuth()
+  const toast = useToast()
+  const navigate = useNavigate()
 
   useGSAP(() => {
     if (isTransparent) {
@@ -61,6 +36,17 @@ export function Navbar({ isTransparent = false }) {
     }
   }
 
+  const handleLogout = async () => {
+    try {
+      await logout()
+      toast.success('Logged out successfully')
+      setIsUserMenuOpen(false)
+      navigate('/')
+    } catch (error) {
+      toast.error('Logout failed. Please try again.')
+    }
+  }
+
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Shop', path: '/shop' },
@@ -69,11 +55,18 @@ export function Navbar({ isTransparent = false }) {
   ]
 
   const categoryLinks = [
-    { label: 'Normal Specs', path: '/shop?category=normal-specs' },
-    { label: 'Sunglasses', path: '/shop?category=sunglasses' },
-    { label: 'Lenses', path: '/shop?category=lenses' },
-    { label: 'Number Glasses', path: '/shop?category=number-glasses' },
-    { label: 'Cases', path: '/shop?category=cases' }
+    { label: 'Normal Specs', path: '/shop?category=normal-specs', slug: 'normal-specs' },
+    { label: 'Sunglasses', path: '/shop?category=sunglasses', slug: 'sunglasses' },
+    { label: 'Lenses', path: '/shop?category=lenses', slug: 'lenses' },
+    { label: 'Number Glasses', path: '/shop?category=number-glasses', slug: 'number-glasses' },
+    { label: 'Cases', path: '/shop?category=cases', slug: 'cases' }
+  ]
+
+  const userMenuItems = [
+    { label: 'My Profile', icon: User, path: '/profile' },
+    { label: 'My Orders', icon: Package, path: '/orders' },
+    { label: 'Wishlist', icon: Heart, path: '/wishlist' },
+    { label: 'Settings', icon: Settings, path: '/settings' },
   ]
 
   return (
@@ -108,7 +101,7 @@ export function Navbar({ isTransparent = false }) {
               </Link>
             ))}
 
-            {isLoggedIn && (
+            {isAuthenticated && (
               <div
                 className="relative"
                 onMouseEnter={() => setIsCategoryOpen(true)}
@@ -150,14 +143,48 @@ export function Navbar({ isTransparent = false }) {
               <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-accent-primary text-[10px] font-bold text-white">3</span>
             </Link>
 
-            {isLoggedIn ? (
-              <Link
-                to="/home"
-                data-cursor="link"
-                className="hidden rounded-lg border border-border-strong bg-white px-3 py-2 text-btn font-medium text-text-primary transition-colors hover:bg-section-alt md:flex"
+            {isAuthenticated ? (
+              <div
+                className="relative hidden md:block"
+                onMouseEnter={() => setIsUserMenuOpen(true)}
+                onMouseLeave={() => setIsUserMenuOpen(false)}
               >
-                {userName}
-              </Link>
+                <button
+                  data-cursor="link"
+                  className="flex items-center gap-2 rounded-lg border border-border-strong bg-white px-3 py-2 text-btn font-medium text-text-primary transition-colors hover:bg-section-alt"
+                >
+                  <User size={16} />
+                  <span>{user?.username || user?.name || 'Account'}</span>
+                  <ChevronDown size={14} className={`transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <div
+                  className={`absolute right-0 top-12 min-w-[200px] rounded-xl border border-border-default bg-white p-2 shadow-[0_20px_40px_rgba(0,0,0,0.12)] transition-all ${isUserMenuOpen ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'}`}
+                >
+                  {userMenuItems.map((item) => (
+                    <Link
+                      key={item.label}
+                      to={item.path}
+                      data-cursor="link"
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-section-alt hover:text-text-primary"
+                    >
+                      <item.icon size={16} />
+                      {item.label}
+                    </Link>
+                  ))}
+                  
+                  <div className="my-1 h-px bg-border-default" />
+                  
+                  <button
+                    onClick={handleLogout}
+                    data-cursor="link"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              </div>
             ) : (
               <Link
                 to="/auth"
@@ -184,7 +211,8 @@ export function Navbar({ isTransparent = false }) {
         onClose={() => setIsDrawerOpen(false)}
         links={navLinks}
         categories={categoryLinks}
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={isAuthenticated}
+        onLogout={handleLogout}
       />
     </>
   )

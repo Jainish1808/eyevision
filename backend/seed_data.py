@@ -9,15 +9,38 @@ from app.core.mongodb import get_mongo_db
 from app.core.security import get_password_hash
 
 CATEGORIES = [
-    {"name": "Sunglasses", "slug": "sunglasses", "description": "Premium sunglasses with UV protection", "icon": "sunglasses"},
-    {"name": "Prescription Glasses", "slug": "prescription-glasses", "description": "Customized prescription eyeglasses", "icon": "glasses"},
-    {"name": "Blue Light Glasses", "slug": "blue-light-glasses", "description": "Protect your eyes from screen glare", "icon": "monitor"},
+    {"name": "Normal Specs", "slug": "normal-specs", "description": "Everyday eyewear for clear vision", "icon": "👓"},
+    {"name": "Sunglasses", "slug": "sunglasses", "description": "Stylish protection from the sun", "icon": "🕶️"},
+    {"name": "Lenses", "slug": "lenses", "description": "Premium lenses for all needs", "icon": "🔍"},
+    {"name": "Number Glasses", "slug": "number-glasses", "description": "Prescription eyewear", "icon": "📖"},
+    {"name": "Cases", "slug": "cases", "description": "Protect your eyewear", "icon": "💼"},
 ]
 
 PRODUCTS = [
-    {"name": "Aviator Classic", "slug": "aviator-classic", "brand": "RayVision", "category_slug": "sunglasses", "description": "Timeless aviator design", "price": 2499, "original_price": 3499, "gender": "unisex", "image": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500", "rating": 4.8, "review_count": 156, "stock": 45, "tags": ["aviator", "classic"], "is_featured": True},
-    {"name": "Wayfarer Original", "slug": "wayfarer-original", "brand": "RayVision", "category_slug": "sunglasses", "description": "Iconic wayfarer style", "price": 1899, "original_price": 2699, "gender": "unisex", "image": "https://images.unsplash.com/photo-1577803645773-f96470509666?w=500", "rating": 4.6, "review_count": 203, "stock": 67, "tags": ["wayfarer"], "is_new_arrival": True},
-    {"name": "Blue Block Pro", "slug": "blue-block-pro", "brand": "Optica", "category_slug": "blue-light-glasses", "description": "Blue light filtering", "price": 1299, "original_price": 1799, "gender": "unisex", "image": "https://images.unsplash.com/photo-1608231397466-21516a8547f5?w=500", "rating": 4.6, "review_count": 312, "stock": 89, "tags": ["blue-light"], "is_featured": True},
+    # Normal Specs
+    {"name": "Classic Round Frame", "slug": "classic-round-frame", "brand": "VisionPro", "category_slug": "normal-specs", "description": "Timeless round frame design for everyday wear", "price": 1499, "original_price": 1999, "gender": "unisex", "image": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500", "rating": 4.8, "review_count": 156, "stock": 45, "tags": ["round", "classic"], "is_featured": True},
+    {"name": "Rectangle Metal Frame", "slug": "rectangle-metal-frame", "brand": "Optica", "category_slug": "normal-specs", "description": "Sleek metal frame for professional look", "price": 1799, "original_price": 2299, "gender": "unisex", "image": "https://images.unsplash.com/photo-1577803645773-f96470509666?w=500", "rating": 4.6, "review_count": 203, "stock": 67, "tags": ["rectangle", "metal"], "is_new_arrival": True},
+    {"name": "Aviator Specs", "slug": "aviator-specs", "brand": "RayVision", "category_slug": "normal-specs", "description": "Aviator style prescription glasses", "price": 2199, "original_price": 2799, "gender": "unisex", "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=500", "rating": 4.7, "review_count": 189, "stock": 52, "tags": ["aviator"], "is_featured": True},
+    
+    # Sunglasses
+    {"name": "Aviator Classic Sunglasses", "slug": "aviator-classic-sunglasses", "brand": "RayVision", "category_slug": "sunglasses", "description": "Timeless aviator design with UV protection", "price": 2499, "original_price": 3499, "gender": "unisex", "image": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500", "rating": 4.8, "review_count": 256, "stock": 85, "tags": ["aviator", "classic", "uv-protection"], "is_featured": True},
+    {"name": "Wayfarer Original", "slug": "wayfarer-original", "brand": "RayVision", "category_slug": "sunglasses", "description": "Iconic wayfarer style sunglasses", "price": 1899, "original_price": 2699, "gender": "unisex", "image": "https://images.unsplash.com/photo-1577803645773-f96470509666?w=500", "rating": 4.6, "review_count": 303, "stock": 97, "tags": ["wayfarer"], "is_new_arrival": True},
+    {"name": "Sport Wrap Sunglasses", "slug": "sport-wrap-sunglasses", "brand": "ActiveVision", "category_slug": "sunglasses", "description": "Sporty wrap-around design", "price": 1599, "original_price": 2199, "gender": "unisex", "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=500", "rating": 4.5, "review_count": 178, "stock": 63, "tags": ["sport", "wrap"], "is_featured": False},
+    
+    # Lenses
+    {"name": "Blue Light Filter Lenses", "slug": "blue-light-filter-lenses", "brand": "LensCraft", "category_slug": "lenses", "description": "Protect your eyes from digital screens", "price": 899, "original_price": 1299, "gender": "unisex", "image": "https://images.unsplash.com/photo-1608231397466-21516a8547f5?w=500", "rating": 4.7, "review_count": 412, "stock": 120, "tags": ["blue-light", "digital"], "is_featured": True},
+    {"name": "Photochromic Lenses", "slug": "photochromic-lenses", "brand": "LensCraft", "category_slug": "lenses", "description": "Automatically adjust to light conditions", "price": 1499, "original_price": 1999, "gender": "unisex", "image": "https://images.unsplash.com/photo-1608231397466-21516a8547f5?w=500", "rating": 4.8, "review_count": 289, "stock": 95, "tags": ["photochromic", "adaptive"], "is_new_arrival": True},
+    {"name": "Anti-Glare Lenses", "slug": "anti-glare-lenses", "brand": "ClearVision", "category_slug": "lenses", "description": "Reduce glare and reflections", "price": 799, "original_price": 1099, "gender": "unisex", "image": "https://images.unsplash.com/photo-1608231397466-21516a8547f5?w=500", "rating": 4.6, "review_count": 356, "stock": 145, "tags": ["anti-glare"], "is_featured": False},
+    
+    # Number Glasses (Prescription)
+    {"name": "Reading Glasses +1.5", "slug": "reading-glasses-1-5", "brand": "ReadWell", "category_slug": "number-glasses", "description": "Comfortable reading glasses", "price": 999, "original_price": 1499, "gender": "unisex", "image": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500", "rating": 4.5, "review_count": 234, "stock": 78, "tags": ["reading", "+1.5"], "is_featured": False},
+    {"name": "Progressive Lenses Frame", "slug": "progressive-lenses-frame", "brand": "VisionPro", "category_slug": "number-glasses", "description": "Multi-focal progressive lenses", "price": 2999, "original_price": 3999, "gender": "unisex", "image": "https://images.unsplash.com/photo-1577803645773-f96470509666?w=500", "rating": 4.9, "review_count": 167, "stock": 42, "tags": ["progressive", "multifocal"], "is_featured": True},
+    {"name": "High Index Thin Lenses", "slug": "high-index-thin-lenses", "brand": "ThinVision", "category_slug": "number-glasses", "description": "Ultra-thin high index lenses", "price": 2499, "original_price": 3299, "gender": "unisex", "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=500", "rating": 4.7, "review_count": 198, "stock": 56, "tags": ["high-index", "thin"], "is_new_arrival": True},
+    
+    # Cases
+    {"name": "Premium Leather Case", "slug": "premium-leather-case", "brand": "CaseGuard", "category_slug": "cases", "description": "Genuine leather protective case", "price": 599, "original_price": 899, "gender": "unisex", "image": "https://images.unsplash.com/photo-1608231397466-21516a8547f5?w=500", "rating": 4.6, "review_count": 445, "stock": 200, "tags": ["leather", "premium"], "is_featured": True},
+    {"name": "Hard Shell Case", "slug": "hard-shell-case", "brand": "ProtectPro", "category_slug": "cases", "description": "Durable hard shell protection", "price": 399, "original_price": 599, "gender": "unisex", "image": "https://images.unsplash.com/photo-1608231397466-21516a8547f5?w=500", "rating": 4.5, "review_count": 523, "stock": 250, "tags": ["hard-shell", "durable"], "is_featured": False},
+    {"name": "Microfiber Pouch", "slug": "microfiber-pouch", "brand": "SoftCase", "category_slug": "cases", "description": "Soft microfiber protective pouch", "price": 199, "original_price": 299, "gender": "unisex", "image": "https://images.unsplash.com/photo-1608231397466-21516a8547f5?w=500", "rating": 4.4, "review_count": 678, "stock": 350, "tags": ["microfiber", "soft"], "is_new_arrival": True},
 ]
 
 
