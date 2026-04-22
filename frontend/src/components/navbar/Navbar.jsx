@@ -5,17 +5,18 @@ import { useGSAP } from '../../hooks/useGSAP'
 import { navbarScrollTrigger } from '../../gsap/scrollAnimations'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useScrollNavbar } from '../../hooks/useScrollNavbar'
 import MobileDrawer from './MobileDrawer'
 import gsap from 'gsap'
 
 export function Navbar({ isTransparent = false }) {
   const navRef = useRef(null)
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
-  const [isCategoryOpen, setIsCategoryOpen] = React.useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
   const { isAuthenticated, user, logout } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
+  const isScrolled = useScrollNavbar(1)
 
   useGSAP(() => {
     if (isTransparent) {
@@ -48,18 +49,18 @@ export function Navbar({ isTransparent = false }) {
   }
 
   const navLinks = [
-    { label: 'Home', path: '/' },
-    { label: 'Shop', path: '/shop' },
-    { label: 'About', path: '/about' },
-    { label: 'Contact', path: '/contact' }
+    { label: 'Home', path: '/', showAlways: true },
+    { label: 'Shop', path: '/shop', showAlways: false },
+    { label: 'About', path: '/about', showAlways: true, guestOnly: true },
+    { label: 'Contact', path: '/contact', showAlways: true, guestOnly: true }
   ]
 
   const categoryLinks = [
-    { label: 'Normal Specs', path: '/shop?category=normal-specs', slug: 'normal-specs' },
-    { label: 'Sunglasses', path: '/shop?category=sunglasses', slug: 'sunglasses' },
-    { label: 'Lenses', path: '/shop?category=lenses', slug: 'lenses' },
-    { label: 'Number Glasses', path: '/shop?category=number-glasses', slug: 'number-glasses' },
-    { label: 'Cases', path: '/shop?category=cases', slug: 'cases' }
+    { label: 'Normal Specs', path: '/shop?category=normal-specs', slug: 'normal-specs', icon: '👓' },
+    { label: 'Sunglasses', path: '/shop?category=sunglasses', slug: 'sunglasses', icon: '🕶️' },
+    { label: 'Lenses', path: '/shop?category=lenses', slug: 'lenses', icon: '🔍' },
+    { label: 'Number Glasses', path: '/shop?category=number-glasses', slug: 'number-glasses', icon: '📖' },
+    { label: 'Cases', path: '/shop?category=cases', slug: 'cases', icon: '💼' }
   ]
 
   const userMenuItems = [
@@ -73,9 +74,11 @@ export function Navbar({ isTransparent = false }) {
     <>
       <nav
         ref={navRef}
-        className={`fixed left-0 top-0 z-[100] w-full transition-colors duration-300 ${
-          isTransparent ? 'bg-transparent' : 'bg-white/88 backdrop-blur-[16px] shadow-[0_1px_0_rgba(0,0,0,0.08)]'
-        }`}
+        className={`fixed z-[100] transition-all duration-500 ease-out ${
+          isScrolled 
+            ? 'left-3 right-3 top-4 rounded-[24px] bg-transparent backdrop-blur-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.12)] sm:left-4 sm:right-4 lg:left-12 lg:right-12 xl:left-16 xl:right-16' 
+            : 'left-0 right-0 top-0 rounded-none bg-white/88 backdrop-blur-[16px] shadow-[0_1px_0_rgba(0,0,0,0.08)]'
+        } ${isTransparent && !isScrolled ? 'bg-transparent shadow-none' : ''}`}
       >
         <div className="container-main mx-auto flex h-16 items-center justify-between">
           {/* Logo */}
@@ -87,50 +90,41 @@ export function Navbar({ isTransparent = false }) {
 
           {/* Desktop Links */}
           <div className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => (
+            {navLinks
+              .filter(link => {
+                // Show all links for guests
+                if (!isAuthenticated) return true
+                // For authenticated users, hide guest-only links
+                return !link.guestOnly
+              })
+              .map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.path}
+                  data-cursor="link"
+                  className="group relative"
+                  onMouseEnter={(e) => handleLinkHover(e, true)}
+                  onMouseLeave={(e) => handleLinkHover(e, false)}
+                >
+                  <span className="text-nav text-text-primary">{link.label}</span>
+                  <span className="nav-line absolute -bottom-1 left-0 h-[1.5px] w-full origin-left scale-x-0 bg-accent-primary" />
+                </Link>
+              ))}
+
+            {/* Show category links directly in navbar when authenticated */}
+            {isAuthenticated && categoryLinks.map((category) => (
               <Link
-                key={link.label}
-                to={link.path}
+                key={category.label}
+                to={category.path}
                 data-cursor="link"
                 className="group relative"
                 onMouseEnter={(e) => handleLinkHover(e, true)}
                 onMouseLeave={(e) => handleLinkHover(e, false)}
               >
-                <span className="text-nav text-text-primary">{link.label}</span>
+                <span className="text-nav text-text-primary">{category.label}</span>
                 <span className="nav-line absolute -bottom-1 left-0 h-[1.5px] w-full origin-left scale-x-0 bg-accent-primary" />
               </Link>
             ))}
-
-            {isAuthenticated && (
-              <div
-                className="relative"
-                onMouseEnter={() => setIsCategoryOpen(true)}
-                onMouseLeave={() => setIsCategoryOpen(false)}
-              >
-                <button
-                  data-cursor="link"
-                  className="flex items-center gap-1 text-nav text-text-primary"
-                >
-                  Eyewear
-                  <ChevronDown size={16} className={`transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                <div
-                  className={`absolute left-0 top-9 min-w-[220px] rounded-xl border border-border-default bg-white p-2 shadow-[0_20px_40px_rgba(0,0,0,0.12)] transition-all ${isCategoryOpen ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'}`}
-                >
-                  {categoryLinks.map((category) => (
-                    <Link
-                      key={category.label}
-                      to={category.path}
-                      data-cursor="link"
-                      className="block rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-section-alt hover:text-text-primary"
-                    >
-                      {category.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Actions */}

@@ -158,7 +158,7 @@ export function HeroLanding() {
       window.removeEventListener('mousemove', handleMouseMove)
       split.revert()
     }
-  }, { scope: containerRef })
+  }, [])
 
   const handleShopClick = (e) => {
     e.preventDefault()

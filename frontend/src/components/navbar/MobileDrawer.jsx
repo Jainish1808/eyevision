@@ -75,18 +75,25 @@ export function MobileDrawer({ isOpen, onClose, links, categories = [], isLogged
         </div>
 
         <div className="mt-8 flex flex-col gap-2">
-          {links.map((link, i) => (
-            <Link
-              key={link.label}
-              to={link.path}
-              ref={(el) => (linksRef.current[i] = el)}
-              onClick={onClose}
-              className="flex items-center justify-between rounded-lg px-4 py-4 text-[18px] font-medium text-text-primary transition-colors hover:bg-section-alt"
-            >
-              {link.label}
-              <ChevronRight size={18} className="text-text-muted" />
-            </Link>
-          ))}
+          {links
+            .filter(link => {
+              // Show all links for guests
+              if (!isLoggedIn) return true
+              // For authenticated users, hide guest-only links
+              return !link.guestOnly
+            })
+            .map((link, i) => (
+              <Link
+                key={link.label}
+                to={link.path}
+                ref={(el) => (linksRef.current[i] = el)}
+                onClick={onClose}
+                className="flex items-center justify-between rounded-lg px-4 py-4 text-[18px] font-medium text-text-primary transition-colors hover:bg-section-alt"
+              >
+                {link.label}
+                <ChevronRight size={18} className="text-text-muted" />
+              </Link>
+            ))}
 
           {isLoggedIn && categories.length > 0 && (
             <div className="mt-3 border-t border-border-default pt-5">
@@ -102,7 +109,7 @@ export function MobileDrawer({ isOpen, onClose, links, categories = [], isLogged
                     ref={(el) => (linksRef.current[links.length + categoryIndex + 1] = el)}
                     className="flex items-center justify-between rounded-lg px-4 py-3 text-base font-medium text-text-primary transition-colors hover:bg-section-alt"
                   >
-                    {category.label}
+                    <span>{category.label}</span>
                     <ChevronRight size={16} className="text-text-muted" />
                   </Link>
                 ))}
